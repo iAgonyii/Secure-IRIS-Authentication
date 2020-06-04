@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
         biometricLoginButton.setOnClickListener(view -> {
             biometricPrompt.authenticate(promptInfo);
         });
-
+        System.out.println(MAC.getMacAddr());
     }
+
+
 }
