@@ -5,11 +5,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
+import android.app.admin.DeviceAdminReceiver;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.concurrent.Executor;
+
+import javax.crypto.Mac;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -65,7 +74,17 @@ public class MainActivity extends AppCompatActivity {
         biometricLoginButton.setOnClickListener(view -> {
             biometricPrompt.authenticate(promptInfo);
         });
-        System.out.println(MAC.getMacAddr());
+
+        DeviceAdminReceiver admin = new DeviceAdminReceiver();
+        DevicePolicyManager devicepolicymanager = admin.getManager(getApplicationContext());
+        ComponentName name1 = admin.getWho(getApplicationContext());
+        System.out.println("REturns: "+ devicepolicymanager.isAdminActive(name1));
+        if (devicepolicymanager.isAdminActive(name1)){
+            String mac_address = devicepolicymanager.getWifiMacAddress(name1);
+            System.out.println("macAddress" +mac_address);
+        }
+        System.out.println("Ended");
+
     }
 
 

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">BiometricAuthentication</string>
+    <string name="admin_receiver_status_pw_changed">Password Changed</string>
+    <string name="admin_receiver_status_disabled">Status disabled</string>
+    <string name="admin_receiver_status_disable_warning">disable warning</string>
+    <string name="admin_receiver_status_enabled">status enabled</string>
+    <string name="admin_receiver_status">status</string>
+    <string name="biometric_authenticater">Biometric Authenticater</string>
+    <string name="biometrics_receiver">Biometric Receiver</string>
 </resources>

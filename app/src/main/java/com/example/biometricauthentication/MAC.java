@@ -1,10 +1,27 @@
 package com.example.biometricauthentication;
 
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
 
-public class MAC {
+public class MAC extends AppCompatActivity {
+
+    public String getMAC(Context context)
+    {
+        WifiManager manager = (WifiManager) getSystemService(context.WIFI_SERVICE);
+        WifiInfo info = manager.getConnectionInfo();
+        String address = info.getMacAddress();
+        System.out.println("Mac address" +address);
+        return address;
+    }
+
+
     public static String getMacAddr() {
         try {
             List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
