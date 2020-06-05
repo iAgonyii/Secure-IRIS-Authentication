@@ -11,11 +11,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.crypto.Mac;
@@ -27,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private BiometricPrompt.PromptInfo promptInfo;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -77,15 +79,15 @@ public class MainActivity extends AppCompatActivity {
 
         DeviceAdminReceiver admin = new DeviceAdminReceiver();
         DevicePolicyManager devicepolicymanager = admin.getManager(getApplicationContext());
-        ComponentName name1 = admin.getWho(getApplicationContext());
-        System.out.println("REturns: "+ devicepolicymanager.isAdminActive(name1));
-        if (devicepolicymanager.isAdminActive(name1)){
+        List<ComponentName> lijstje = devicepolicymanager.getActiveAdmins();
+        System.out.println("DIT IS DE LIJST" + " " + lijstje);
+        ComponentName name1 = lijstje.get(0);
+        System.out.println("REturns: " + devicepolicymanager.isAdminActive(name1));
+        if (devicepolicymanager.isAdminActive(name1)) {
             String mac_address = devicepolicymanager.getWifiMacAddress(name1);
-            System.out.println("macAddress" +mac_address);
+            System.out.println("macAddress" + mac_address);
         }
-        System.out.println("Ended");
+
 
     }
-
-
 }
