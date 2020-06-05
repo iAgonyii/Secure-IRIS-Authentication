@@ -1,5 +1,8 @@
 package com.example.biometricauthentication;
 
+import android.app.admin.DeviceAdminReceiver;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -12,39 +15,19 @@ import java.util.List;
 
 public class MAC extends AppCompatActivity {
 
-    public String getMAC(Context context)
+    public static String getMAC(Context context)
     {
-        WifiManager manager = (WifiManager) getSystemService(context.WIFI_SERVICE);
-        WifiInfo info = manager.getConnectionInfo();
-        String address = info.getMacAddress();
-        System.out.println("Mac address" +address);
-        return address;
-    }
+        String mac = "";
+        DeviceAdminReceiver admin = new DeviceAdminReceiver();
+        DevicePolicyManager devicepolicymanager = admin.getManager(context);
+        List<ComponentName> lijstje = devicepolicymanager.getActiveAdmins();
+        System.out.println("DIT IS DE LIJST" + " " + lijstje);
+        ComponentName name1 = lijstje.get(2);
 
-
-    public static String getMacAddr() {
-        try {
-            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
-            for (NetworkInterface nif : all) {
-                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
-
-                byte[] macBytes = nif.getHardwareAddress();
-                if (macBytes == null) {
-                    return "";
-                }
-
-                StringBuilder res1 = new StringBuilder();
-                for (byte b : macBytes) {
-                    res1.append(String.format("%02X:",b));
-                }
-
-                if (res1.length() > 0) {
-                    res1.deleteCharAt(res1.length() - 1);
-                }
-                return res1.toString();
-            }
-        } catch (Exception ex) {
+        if (devicepolicymanager.isAdminActive(name1)) {
+            mac = devicepolicymanager.getWifiMacAddress(name1);
+            System.out.println("macAddress" + mac);
         }
-        return "02:00:00:00:00:00";
+        return mac;
     }
 }

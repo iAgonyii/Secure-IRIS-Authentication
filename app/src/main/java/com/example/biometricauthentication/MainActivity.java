@@ -19,14 +19,14 @@ import android.widget.Toast;
 
 import java.util.List;
 import java.util.concurrent.Executor;
-
-import javax.crypto.Mac;
+import com.example.biometricauthentication.MAC;
 
 public class MainActivity extends AppCompatActivity {
 
     private Executor executor;
     private BiometricPrompt biometricPrompt;
     private BiometricPrompt.PromptInfo promptInfo;
+    private RestAPI api;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,6 +52,18 @@ public class MainActivity extends AppCompatActivity {
                 super.onAuthenticationSucceeded(result);
                 Toast.makeText(getApplicationContext(),
                         "Authentication succeeded!", Toast.LENGTH_SHORT).show();
+
+                String mac = MAC.getMAC(getApplicationContext());
+                // To do: send to rest api
+                api = new RestAPI();
+                try {
+                    String password = api.sendMacToAPI(mac);
+                    Toast.makeText(getApplicationContext(), password, Toast.LENGTH_LONG).show();
+
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -76,18 +88,5 @@ public class MainActivity extends AppCompatActivity {
         biometricLoginButton.setOnClickListener(view -> {
             biometricPrompt.authenticate(promptInfo);
         });
-
-        DeviceAdminReceiver admin = new DeviceAdminReceiver();
-        DevicePolicyManager devicepolicymanager = admin.getManager(getApplicationContext());
-        List<ComponentName> lijstje = devicepolicymanager.getActiveAdmins();
-        System.out.println("DIT IS DE LIJST" + " " + lijstje);
-        ComponentName name1 = lijstje.get(0);
-        System.out.println("REturns: " + devicepolicymanager.isAdminActive(name1));
-        if (devicepolicymanager.isAdminActive(name1)) {
-            String mac_address = devicepolicymanager.getWifiMacAddress(name1);
-            System.out.println("macAddress" + mac_address);
-        }
-
-
     }
 }
