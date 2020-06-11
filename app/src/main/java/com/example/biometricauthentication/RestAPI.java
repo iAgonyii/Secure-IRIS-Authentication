@@ -1,46 +1,69 @@
 package com.example.biometricauthentication;
 
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.web.client.RestTemplate;
-
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class RestAPI {
 
     public String sendMacToAPI(String macAddress) throws Exception {
-
-        Task task = new Task();
-        task.setMac(macAddress);
-        FutureTask futureTasktask = new FutureTask(task);
-        Thread t = new Thread(futureTasktask);
+        HttpsURLConnection conn = HttpsConnectionFactory.getConnection(
+                new URL("https://192.168.178.80:8443/mac"), "POST");
+        HTTPSHandler handler = new HTTPSHandler(conn, macAddress);
+        FutureTask task = new FutureTask<>(handler);
+        Thread t = new Thread(task);
         t.start();
-        String password = (String) futureTasktask.get();
-        System.out.println("Executed task: " + password);
-        return password;
 
+        return (String)task.get();
     }
-    class Task implements Callable<String> {
-        // To Do : Add api url for getting a generated password.
-        private String serverUrl = "http://192.168.178.80:8080/mac";
-        private String mac = "";
+}
 
-        public void setMac(String mac) {
-            this.mac = mac;
+class HTTPSHandler implements Callable<String>{
+
+    private String message;
+    private HttpsURLConnection connection;
+
+    public HTTPSHandler(HttpsURLConnection connection, String message) {
+        this.connection = connection;
+        this.message = message;
+    }
+
+    private void writeOutputStream(HttpsURLConnection destination, String message) {
+        try(OutputStream os = destination.getOutputStream()) {
+            byte[] input = message.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
         }
-
-
-        @Override
-        public String call() throws Exception {
-            RestTemplate rest = new RestTemplate();
-
-            rest.getMessageConverters().add(new StringHttpMessageConverter());
-            System.out.println("MAc address in task " + mac);
-            // Change this so it posts a MAC address to the api.
-            //String result = rest.getForObject(this.serverUrl, String.class, "Android");
-            String result = rest.postForObject(this.serverUrl, this.mac, String.class);
-            return result;
+        catch (Exception ex) {
+            System.out.println("Error trying to write output stream: " + ex);
         }
     }
 
+    private String readResponse(InputStream stream) {
+        StringBuilder response = new StringBuilder();
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+            String responseLine;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+            System.out.println("The response: " + response.toString());
+        }
+        catch (Exception ex) {
+            System.out.println("Exception when reading response: " + ex);
+        }
+        return response.toString();
+    }
+
+
+    @Override
+    public String call() throws Exception {
+        writeOutputStream(connection, message);
+        return readResponse(connection.getInputStream());
+    }
 }

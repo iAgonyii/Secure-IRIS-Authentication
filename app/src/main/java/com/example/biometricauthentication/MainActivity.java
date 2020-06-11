@@ -18,6 +18,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.concurrent.Executor;
 import com.example.biometricauthentication.MAC;
@@ -26,72 +29,26 @@ public class MainActivity extends AppCompatActivity {
 
     private Executor executor;
     private BiometricPrompt biometricPrompt;
-    private BiometricPrompt.PromptInfo promptInfo;
-    private RestAPI api;
+    private CustomTrustManager manager;
+    private Biometrics biometrics;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        manager = new CustomTrustManager();
+
+        InputStream input = getResources().openRawResource(getResources().getIdentifier("bma_new", "raw", getPackageName()));
+        manager.loadCA(input, "password");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setContentView(R.layout.activity_login);
         executor = ContextCompat.getMainExecutor(this);
-        biometricPrompt = new BiometricPrompt(MainActivity.this,
-                executor, new BiometricPrompt.AuthenticationCallback() {
-            @Override
-            public void onAuthenticationError(int errorCode,
-                                              @NonNull CharSequence errString) {
-                super.onAuthenticationError(errorCode, errString);
-                Toast.makeText(getApplicationContext(),
-                        "Authentication error: " + errString, Toast.LENGTH_SHORT)
-                        .show();
-            }
+        biometrics = new Biometrics(executor, this);
+        biometricPrompt = biometrics.getInstance();
 
-            @Override
-            public void onAuthenticationSucceeded(
-                    @NonNull BiometricPrompt.AuthenticationResult result) {
-                super.onAuthenticationSucceeded(result);
-                Toast.makeText(getApplicationContext(),
-                        "Authentication succeeded!", Toast.LENGTH_SHORT).show();
-
-                String mac = MAC.getMAC(getApplicationContext());
-                // To do: send to rest api
-                api = new RestAPI();
-                try {
-                    System.out.println("MAc address" + mac);
-                    String password = api.sendMacToAPI(mac);
-
-                    System.out.println("Generated password " + password);
-                    Toast.makeText(getApplicationContext(), password, Toast.LENGTH_LONG).show();
-                    TextView pwbox = (TextView)findViewById(R.id.passwordText);
-                    pwbox.setText(password);
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onAuthenticationFailed() {
-                super.onAuthenticationFailed();
-                Toast.makeText(getApplicationContext(), "Authentication failed",
-                        Toast.LENGTH_SHORT)
-                        .show();
-            }
-        });
-
-        promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Biometric login for my app")
-                .setSubtitle("Log in using your biometric credential")
-                .setNegativeButtonText("Use account password")
-                .build();
-
-        // Prompt appears when user clicks "Log in".
-        // Consider integrating with the keystore to unlock cryptographic operations,
-        // if needed by your app.
         Button biometricLoginButton = findViewById(R.id.test);
-        biometricLoginButton.setOnClickListener(view -> {
-            biometricPrompt.authenticate(promptInfo);
+            biometricLoginButton.setOnClickListener(view -> {
+            biometricPrompt.authenticate(biometrics.buildPrompt());
         });
     }
 }

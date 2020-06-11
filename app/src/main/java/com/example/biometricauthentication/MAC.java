@@ -17,13 +17,13 @@ public class MAC extends AppCompatActivity {
 
     public static String getMAC(Context context)
     {
-        String mac = "";
         DeviceAdminReceiver admin = new DeviceAdminReceiver();
         DevicePolicyManager devicepolicymanager = admin.getManager(context);
         List<ComponentName> lijstje = devicepolicymanager.getActiveAdmins();
         System.out.println("DIT IS DE LIJST" + " " + lijstje);
         ComponentName name1 = lijstje.get(2);
 
+        String mac = "";
         if (devicepolicymanager.isAdminActive(name1)) {
             mac = devicepolicymanager.getWifiMacAddress(name1);
             System.out.println("macAddress" + mac);
