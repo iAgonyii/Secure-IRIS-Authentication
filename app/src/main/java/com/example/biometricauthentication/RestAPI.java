@@ -10,27 +10,35 @@ public class RestAPI {
 
     public String sendMacToAPI(String macAddress) throws Exception {
 
-        Callable callable = new Task();
-        FutureTask task = new FutureTask(callable);
-        Thread t = new Thread(task);
+        Task task = new Task();
+        task.setMac(macAddress);
+        FutureTask futureTasktask = new FutureTask(task);
+        Thread t = new Thread(futureTasktask);
         t.start();
-        String password = (String) task.get();
+        String password = (String) futureTasktask.get();
         System.out.println("Executed task: " + password);
         return password;
 
     }
     class Task implements Callable<String> {
         // To Do : Add api url for getting a generated password.
-        private String serverUrl = "https://ajax.googleapis.com/ajax/" +
-                "services/search/web?v=1.0&q={query}";
+        private String serverUrl = "http://192.168.178.80:8080/mac";
+        private String mac = "";
+
+        public void setMac(String mac) {
+            this.mac = mac;
+        }
+
 
         @Override
         public String call() throws Exception {
             RestTemplate rest = new RestTemplate();
-            rest.getMessageConverters().add(new StringHttpMessageConverter());
 
+            rest.getMessageConverters().add(new StringHttpMessageConverter());
+            System.out.println("MAc address in task " + mac);
             // Change this so it posts a MAC address to the api.
-            String result = rest.getForObject(this.serverUrl, String.class, "Android");
+            //String result = rest.getForObject(this.serverUrl, String.class, "Android");
+            String result = rest.postForObject(this.serverUrl, this.mac, String.class);
             return result;
         }
     }

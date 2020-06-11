@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
@@ -57,9 +58,13 @@ public class MainActivity extends AppCompatActivity {
                 // To do: send to rest api
                 api = new RestAPI();
                 try {
+                    System.out.println("MAc address" + mac);
                     String password = api.sendMacToAPI(mac);
-                    Toast.makeText(getApplicationContext(), password, Toast.LENGTH_LONG).show();
 
+                    System.out.println("Generated password " + password);
+                    Toast.makeText(getApplicationContext(), password, Toast.LENGTH_LONG).show();
+                    TextView pwbox = (TextView)findViewById(R.id.passwordText);
+                    pwbox.setText(password);
                 }
                 catch (Exception e) {
                     e.printStackTrace();
